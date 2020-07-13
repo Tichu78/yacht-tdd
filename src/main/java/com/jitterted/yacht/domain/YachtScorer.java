@@ -42,37 +42,22 @@ public class YachtScorer {
   }
 
   private boolean isValidFullHouse(DiceRoll roll) {
-    var dieToCountMap = createDieToCountMap(roll);
 
-    long numberOfDiceOccurringTwoOrThreeTimes = countForDieOccurringTwoOrThreeTimes(dieToCountMap);
+    Map<Integer, Long> dieToCountMap = roll.stream()
+              .collect(
+                      groupingBy(
+                              Function.identity(),
+                              counting()));
 
-    return hasTwoUniqueDice(dieToCountMap)
-        && numberOfDiceOccurringTwoOrThreeTimes == 2;
+      return hasTwoUniqueDice(dieToCountMap) && hasDieOccuringTwoTimes(dieToCountMap);
+  }
+
+  private boolean hasDieOccuringTwoTimes(Map<Integer, Long> dieToCountMap) {
+      return dieToCountMap.containsValue(2);
   }
 
   private boolean hasTwoUniqueDice(Map<Integer, Long> dieToCountMap) {
     return dieToCountMap.size() == 2;
-  }
-
-  private long countForDieOccurringTwoOrThreeTimes(Map<Integer, Long> dieToCountMap) {
-    return dieToCountMap.entrySet()
-                 .stream()
-                 .filter(this::twoOrThreeOccurrences)
-                 .count();
-  }
-
-  private Map<Integer, Long> createDieToCountMap(DiceRoll roll) {
-    return roll.stream()
-        .collect(
-            Collectors.groupingBy(
-                Function.identity(),
-                Collectors.counting()
-            )
-        );
-  }
-
-  private boolean twoOrThreeOccurrences(Map.Entry<Integer, Long> e) {
-    return e.getValue() == 2 || e.getValue() == 3;
   }
 
   private int calculateScore(DiceRoll dice, int scoreCategory) {
